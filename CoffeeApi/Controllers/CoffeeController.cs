@@ -35,5 +35,45 @@ namespace CoffeeApi.Controllers
 
             return coffeeList[id];
         }
+
+        // 새로운 커피 메뉴를 추가하는 함수
+        [HttpPost]
+        public string AddCoffee(Coffee newCoffee)
+        {
+            coffeeList.Add(newCoffee);
+            return $"{newCoffee.Name} 메뉴가 추가되었습니다!";
+        }
+
+        // 특정 번호의 커피를 삭제하는 기능
+        [HttpDelete("{id}")]
+        public string DeleteCoffee(int id)
+        {
+            if(id < 0 || id >= coffeeList.Count)
+            {
+                return "삭제할 커피가 없습니다.";
+            }
+
+            Coffee removedCoffee = coffeeList[id];
+            coffeeList.RemoveAt(id);
+
+            return $"{removedCoffee.Name} 메뉴가 삭제되었습니다.";
+        }
+
+        // 특정 번호의 커피 정보를 수정하는 기능
+        [HttpPut("{id}")]
+        public string UpdateCoffee(int id, Coffee updatedCoffee)
+        { 
+            // 1. 해당 번호가 리스트에 있는지 확인 (안전장치)
+            if(id < 0 || id >= coffeeList.Count)
+            {
+                return "수정할 커피 번호가 잘못되었습니다.";
+            }
+
+            // 2. 기존 데이터를 새 데이터로 교체
+            // 여기서는 리스트의 해당 칸에 새로운 객체를 덮어씌운다.
+            coffeeList[id] = updatedCoffee;
+
+            return $"{id}번 메뉴가 {updatedCoffee.Name} (으)로 수정되었습니다.";
+        }
     }
 }
