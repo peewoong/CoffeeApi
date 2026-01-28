@@ -39,13 +39,15 @@ namespace CoffeeApi.Controllers
         // 주소 예시 : api/coffee/0 또는 api/coffee/1
         [HttpGet("{id}")]
         public Coffee GetCoffeeById(int id) {             // 간단한 예시로, 고정된 커피 데이터를 반환
+            var coffee = _context.Coffee.Find(id);
+
             // 만약 리스트 범위 밖의 숫자를 요청하면 에러 발생 가능, 안전장치 설치
-            if (id < 0 || id >= _context.Coffee.ToList().Count)
+            if (id < 0 || id >= _context.Coffee.ToList().Count || coffee == null)
             {
                 return null; // 또는 적절한 오류 처리
             }
 
-            return _context.Coffee.ToList()[id];
+            return coffee;
         }
 
         // 새로운 커피 메뉴를 추가하는 함수
@@ -62,6 +64,14 @@ namespace CoffeeApi.Controllers
         [HttpDelete("{id}")]
         public string DeleteCoffee(int id)
         {
+            var coffee = _context.Coffee.Find(id);
+            if (coffee == null) return "삭제할 커피가 없습니다.";
+
+            _context.Coffee.Remove(coffee);
+            _context.SaveChanges(); // save
+            return $"{coffee.Name} 메뉴가 삭제되었습니다.";
+
+            /*
             if(id < 0 || id >= _context.Coffee.ToList().Count)
             {
                 return "삭제할 커피가 없습니다.";
@@ -71,12 +81,23 @@ namespace CoffeeApi.Controllers
             _context.Coffee.ToList().RemoveAt(id);
 
             return $"{removedCoffee.Name} 메뉴가 삭제되었습니다.";
+            */
         }
 
         // 특정 번호의 커피 정보를 수정하는 기능
         [HttpPut("{id}")]
         public string UpdateCoffee(int id, Coffee updatedCoffee)
-        { 
+        {
+            var existingCoffee = _context.Coffee.Find(id);
+            if (existingCoffee == null) return "수정할 커피가 없습니다.";
+
+            existingCoffee.Name = updatedCoffee.Name;
+            existingCoffee.Price = updatedCoffee.Price;
+
+            _context.SaveChanges(); // save
+            return $"{id}번 메뉴가 수정되었습니다.";
+
+            /*
             // 1. 해당 번호가 리스트에 있는지 확인 (안전장치)
             if(id < 0 || id >= _context.Coffee.ToList().Count)
             {
@@ -88,6 +109,7 @@ namespace CoffeeApi.Controllers
             _context.Coffee.ToList()[id] = updatedCoffee;
 
             return $"{id}번 메뉴가 {updatedCoffee.Name} (으)로 수정되었습니다.";
+            */
         }
     }
 }
